@@ -7,6 +7,7 @@ require 'sass'
 require 'json'
 require 'yaml'
 require 'thin'
+require 'data_mapper'
 
 SCHEDULER = Rufus::Scheduler.new
 
@@ -57,6 +58,19 @@ at_exit do
   File.write(settings.history_file, settings.history.to_yaml)
 end
 
+# Data Mapper setup
+DataMapper::setup(:default, "sqlite3://#{:root}/dashboard.db")
+
+class Widget
+  include DataMapper::Resource
+  property :id, Serial
+  property :name, String
+  property :count, FixedNum
+end
+
+DataMapper.finalize
+Widget.auto_upgrade!
+
 get '/' do
   protected!
   dashboard = settings.default_dashboard || first_dashboard
@@ -104,6 +118,11 @@ post '/widgets/:id' do
   body = JSON.parse(request.body.read)
   auth_token = body.delete("auth_token")
   if !settings.auth_token || settings.auth_token == auth_token
+    widget = Widget.find(name: params['id'])
+    unless widget.nil?
+      widget.count += 1
+      widget.save
+    end
     send_event(params['id'], body)
     204 # response without entity body
   else

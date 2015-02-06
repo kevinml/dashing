@@ -25,6 +25,8 @@ Gem::Specification.new do |s|
   s.add_dependency('thor', '~> 0.18.1')
   s.add_dependency('sprockets', '~> 2.10.1')
   s.add_dependency('rack', '~> 1.5.2')
+  s.add_dependency('dm-sqlite-adapter')
+  s.add_dependency('data_mapper')
 
   s.add_development_dependency('rake', '~> 10.1.0')
   s.add_development_dependency('haml', '~> 4.0.4')
